@@ -9,7 +9,6 @@ def keep_to_md(title: str, text: str, tags: Optional[list[str]] = None) -> str:
     in_callout = False
     callout_type = ""
     callout_lines: list[str] = []
-    first_line_used = False
 
     front_matter_lines: list[str] = ["---"]
     if title:
@@ -72,7 +71,11 @@ def keep_to_md(title: str, text: str, tags: Optional[list[str]] = None) -> str:
             callout_lines = [m_callout.group(3)] if m_callout.group(3) else []
             continue
 
-        if in_callout and stripped.startswith("📌") and not re.match(r"^(📌|⚠️|💡)\s+(NOTE|WARNING|TIP):", stripped):
+        if (
+            in_callout
+            and stripped.startswith("📌")
+            and not re.match(r"^(📌|⚠️|💡)\s+(NOTE|WARNING|TIP):", stripped)
+        ):
             callout_lines.append(stripped[1:].strip())
             continue
         if in_callout and re.match(r"^(📌|⚠️|💡)\s+", stripped):
@@ -118,7 +121,7 @@ def keep_to_md(title: str, text: str, tags: Optional[list[str]] = None) -> str:
 
         if re.match(r"^🔗\s", stripped):
             flush_callout()
-            wikilink = stripped[1:].strip()
+            wikilink = stripped[2:].strip()
             output.append(f"[[{wikilink}]]")
             continue
 
@@ -145,4 +148,5 @@ def keep_to_md(title: str, text: str, tags: Optional[list[str]] = None) -> str:
 def _restore_inline(text: str) -> str:
     text = re.sub(r"\*\*(.+?)\*\*", r"**\1**", text)
     text = re.sub(r"\*(.+?)\*", r"*\1*", text)
+    text = re.sub(r"🔗\s*([^\s].*)", r"[[\1]]", text)
     return text

@@ -1,12 +1,10 @@
 import os
-import re
 from pathlib import Path
 from typing import Optional
 
 import frontmatter
-import yaml
 
-from converters.md_to_keep import extract_title, extract_tags, extract_tasks
+from converters.md_to_keep import extract_tags, extract_tasks, extract_title
 
 
 class ObsidianNote:

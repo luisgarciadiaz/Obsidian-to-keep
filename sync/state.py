@@ -1,7 +1,7 @@
 import hashlib
 import sqlite3
 import threading
-from dataclasses import dataclass, field
+from dataclasses import dataclass
 from pathlib import Path
 from typing import Optional
 
@@ -82,7 +82,9 @@ class SyncStateDB:
     def upsert(self, row: SyncStateRow):
         self._conn.execute(
             """
-            INSERT INTO sync_state (note_id, file_path, obsidian_mtime, keep_updated, content_hash, sync_direction, conflict)
+            INSERT INTO sync_state
+                (note_id, file_path, obsidian_mtime, keep_updated,
+                 content_hash, sync_direction, conflict)
             VALUES (?, ?, ?, ?, ?, ?, ?)
             ON CONFLICT(note_id) DO UPDATE SET
                 file_path = excluded.file_path,
@@ -124,9 +126,7 @@ class SyncStateDB:
         ]
 
     def conflicts(self) -> list[SyncStateRow]:
-        rows = self._conn.execute(
-            "SELECT * FROM sync_state WHERE conflict = 1"
-        ).fetchall()
+        rows = self._conn.execute("SELECT * FROM sync_state WHERE conflict = 1").fetchall()
         return [
             SyncStateRow(
                 note_id=r["note_id"],

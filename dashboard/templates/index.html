@@ -1,0 +1,187 @@
+<!doctype html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>Obsidian ↔ Keep Sync</title>
+    <script src="https://unpkg.com/htmx.org@2.0.0"></script>
+    <style>
+      * {
+        box-sizing: border-box;
+        margin: 0;
+        padding: 0;
+      }
+      body {
+        font-family:
+          -apple-system, BlinkMacSystemFont, "Segoe UI", Roboto, sans-serif;
+        background: #f5f5f5;
+        color: #333;
+        padding: 2rem;
+      }
+      h1 {
+        margin-bottom: 1.5rem;
+        font-weight: 600;
+      }
+      .grid {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 1rem;
+        margin-bottom: 2rem;
+      }
+      .card {
+        background: white;
+        border-radius: 8px;
+        padding: 1.25rem;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      .card h3 {
+        font-size: 0.85rem;
+        text-transform: uppercase;
+        letter-spacing: 0.5px;
+        color: #666;
+        margin-bottom: 0.5rem;
+      }
+      .card .value {
+        font-size: 2rem;
+        font-weight: 700;
+      }
+      .card .value.conflict {
+        color: #e53e3e;
+      }
+      table {
+        width: 100%;
+        border-collapse: collapse;
+        background: white;
+        border-radius: 8px;
+        overflow: hidden;
+        box-shadow: 0 1px 3px rgba(0, 0, 0, 0.1);
+      }
+      th,
+      td {
+        padding: 0.75rem 1rem;
+        text-align: left;
+        border-bottom: 1px solid #eee;
+      }
+      th {
+        background: #fafafa;
+        font-weight: 600;
+        font-size: 0.85rem;
+        color: #666;
+      }
+      .badge {
+        display: inline-block;
+        padding: 0.2rem 0.6rem;
+        border-radius: 4px;
+        font-size: 0.8rem;
+        font-weight: 500;
+      }
+      .badge.conflict {
+        background: #fff5f5;
+        color: #e53e3e;
+      }
+      .badge.ok {
+        background: #f0fff4;
+        color: #38a169;
+      }
+      .btn {
+        display: inline-block;
+        padding: 0.5rem 1rem;
+        border-radius: 6px;
+        border: 1px solid #ddd;
+        background: white;
+        cursor: pointer;
+        font-size: 0.9rem;
+        margin-bottom: 1rem;
+      }
+      .btn:hover {
+        background: #f0f0f0;
+      }
+      .logs {
+        background: #1a1a2e;
+        color: #e0e0e0;
+        padding: 1rem;
+        border-radius: 8px;
+        font-family: "SF Mono", "Fira Code", monospace;
+        font-size: 0.8rem;
+        max-height: 300px;
+        overflow-y: auto;
+        margin-top: 1rem;
+      }
+    </style>
+  </head>
+  <body>
+    <h1>Obsidian ↔ Keep Sync Dashboard</h1>
+
+    <div class="grid">
+      <div class="card">
+        <h3>Last Run</h3>
+        <div class="value" id="last-run">{{ stats.last_run or "Never" }}</div>
+      </div>
+      <div class="card">
+        <h3>Synced Notes</h3>
+        <div class="value">{{ total_notes }}</div>
+      </div>
+      <div class="card">
+        <h3>Notes Pushed</h3>
+        <div class="value">{{ stats.notes_pushed }}</div>
+      </div>
+      <div class="card">
+        <h3>Notes Pulled</h3>
+        <div class="value">{{ stats.notes_pulled }}</div>
+      </div>
+      <div class="card">
+        <h3>Conflicts</h3>
+        <div class="value conflict {% if conflicts == 0 %}ok{% endif %}">
+          {{ conflicts }}
+        </div>
+      </div>
+      <div class="card">
+        <h3>Errors</h3>
+        <div class="value">{{ stats.errors }}</div>
+      </div>
+    </div>
+
+    <button
+      class="btn"
+      hx-post="/api/sync"
+      hx-swap="none"
+      hx-trigger="click"
+      hx-on::after-request="setTimeout(() => location.reload(), 500)"
+    >
+      Run Sync Now
+    </button>
+
+    <h2 style="margin: 1.5rem 0 0.75rem">Conflicts</h2>
+    {% if conflict_list %}
+    <table>
+      <thead>
+        <tr>
+          <th>File</th>
+          <th>Keep ID</th>
+          <th>Obsidian Mtime</th>
+          <th>Keep Updated</th>
+        </tr>
+      </thead>
+      <tbody>
+        {% for c in conflict_list %}
+        <tr>
+          <td><code>{{ c.file_path }}</code></td>
+          <td><code>{{ c.note_id[:12] }}…</code></td>
+          <td>{{ c.obsidian_mtime }}</td>
+          <td>{{ c.keep_updated }}</td>
+        </tr>
+        {% endfor %}
+      </tbody>
+    </table>
+    {% else %}
+    <p>No conflicts.</p>
+    {% endif %}
+
+    <h2 style="margin: 1.5rem 0 0.75rem">Recent Logs</h2>
+    <div class="logs" id="log-viewer">
+      <div hx-get="/api/logs" hx-trigger="load" hx-swap="innerHTML">
+        Loading logs...
+      </div>
+    </div>
+  </body>
+</html>

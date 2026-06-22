@@ -1,5 +1,4 @@
 import re
-from mistletoe import block_token, span_token
 
 
 def md_to_keep_text(markdown: str) -> str:
@@ -14,13 +13,14 @@ def md_to_keep_text(markdown: str) -> str:
     while i < len(lines):
         line = lines[i]
 
-        if not front_matter_done and line.startswith("---"):
-            front_matter_done = True
-            i += 1
-            while i < len(lines) and not lines[i].startswith("---"):
+        if not front_matter_done and line.strip() == "---":
+            if i + 1 < len(lines) and ":" in lines[i + 1]:
+                front_matter_done = True
                 i += 1
-            i += 1
-            continue
+                while i < len(lines) and not lines[i].strip().startswith("---"):
+                    i += 1
+                i += 1
+                continue
 
         front_matter_done = True
 

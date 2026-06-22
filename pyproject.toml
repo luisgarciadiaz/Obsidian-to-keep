@@ -4,7 +4,7 @@ version = "0.1.0"
 description = "Bidirectional sync between Google Keep and Obsidian vault"
 readme = "README.md"
 requires-python = ">=3.11"
-license = { text = "MIT" }
+license = "MIT"
 
 dependencies = [
     "gkeepapi>=0.14.0",
@@ -34,6 +34,9 @@ dev = [
     "pytest-asyncio>=0.24.0",
     "ruff>=0.6.0",
 ]
+
+[tool.setuptools.packages.find]
+include = ["sync*", "adapters*", "converters*", "dashboard*"]
 
 [project.scripts]
 obsidian-keep-sync = "main:cli"

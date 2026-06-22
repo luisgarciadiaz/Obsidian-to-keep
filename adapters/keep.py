@@ -1,6 +1,4 @@
 import logging
-import os
-import time
 from typing import Optional
 
 import gkeepapi
@@ -53,8 +51,7 @@ class KeepAdapter:
         if stored:
             return stored
         raise RuntimeError(
-            f"No master token found for {self.email}. "
-            "Run `python main.py auth` first."
+            f"No master token found for {self.email}. Run `python main.py auth` first."
         )
 
     def _store_master_token(self, token: str):
@@ -108,7 +105,7 @@ class KeepAdapter:
         sync = self._find_or_create_label(sync_label)
         results: list[KeepNote] = []
         for gnote in self.keep.find(labels=[inbox]):
-            has_sync = any(l for l in gnote.labels.all() if l == sync)
+            has_sync = any(lbl for lbl in gnote.labels.all() if lbl == sync)
             if not has_sync:
                 results.append(self._gkeep_to_keepnote(gnote))
         return results
@@ -193,23 +190,23 @@ class KeepAdapter:
         return label
 
     def _gkeep_to_keepnote(self, gnote) -> KeepNote:
-        labels = [l.name for l in gnote.labels.all()]
+        labels = [lbl.name for lbl in gnote.labels.all()]
         updated_iso = ""
-        if gnode.timestamps.updated:
+        if gnote.timestamps.updated:
             updated_iso = (
-                gnode.timestamps.updated.isoformat()
-                if hasattr(gnode.timestamps.updated, "isoformat")
-                else str(gnode.timestamps.updated)
+                gnote.timestamps.updated.isoformat()
+                if hasattr(gnote.timestamps.updated, "isoformat")
+                else str(gnote.timestamps.updated)
             )
         return KeepNote(
-            note_id=gnode.id,
-            title=gnode.title,
-            text=gnode.text,
+            note_id=gnote.id,
+            title=gnote.title,
+            text=gnote.text,
             labels=labels,
-            color=gnode.color,
-            pinned=gnode.pinned,
-            trashed=gnode.trash,
-            archived=gnode.archived,
+            color=gnote.color,
+            pinned=gnote.pinned,
+            trashed=gnote.trash,
+            archived=gnote.archived,
             updated=updated_iso,
         )
 
@@ -221,14 +218,12 @@ class KeepAdapter:
         text_lines: list[str] = []
         lines = markdown.split("\n")
         in_front = False
-        front_done = False
         for line in lines:
             if line.startswith("---"):
                 if not in_front:
                     in_front = True
                 else:
                     in_front = False
-                    front_done = True
                 continue
             if in_front:
                 continue
