@@ -1,0 +1,20 @@
+obsidian:
+  vault_path: "~/Documents/MyVault"
+  sync_folders: [""]
+  exclude_patterns: ["_templates/**", ".obsidian/**"]
+  front_matter_key: "keep_id"
+
+keep:
+  google_account: "user@gmail.com"
+  sync_label: "obsidian-sync"
+  inbox_label: "obsidian-inbox"
+
+sync:
+  interval_seconds: 60
+  watch_obsidian: true
+  conflict_strategy: "newer_wins"
+  two_way: true
+
+logging:
+  level: "INFO"
+  file: "sync.log"

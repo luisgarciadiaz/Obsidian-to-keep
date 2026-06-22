@@ -1,0 +1,50 @@
+[project]
+name = "obsidian-keep-sync"
+version = "0.1.0"
+description = "Bidirectional sync between Google Keep and Obsidian vault"
+readme = "README.md"
+requires-python = ">=3.11"
+license = { text = "MIT" }
+
+dependencies = [
+    "gkeepapi>=0.14.0",
+    "python-frontmatter>=1.1.0",
+    "mistletoe>=1.4.0",
+    "pyyaml>=6.0",
+    "pydantic-settings>=2.0",
+    "apscheduler>=3.10.0",
+    "watchdog>=4.0.0",
+    "keyring>=25.0.0",
+    "google-auth>=2.29.0",
+    "google-auth-oauthlib>=1.2.0",
+    "httpx>=0.27.0",
+]
+
+[project.optional-dependencies]
+dashboard = [
+    "fastapi>=0.115.0",
+    "jinja2>=3.1.0",
+    "uvicorn>=0.30.0",
+    "python-multipart>=0.0.12",
+    "sse-starlette>=2.1.0",
+]
+dev = [
+    "pytest>=8.0",
+    "pytest-cov>=5.0",
+    "pytest-asyncio>=0.24.0",
+    "ruff>=0.6.0",
+]
+
+[project.scripts]
+obsidian-keep-sync = "main:cli"
+
+[tool.ruff]
+line-length = 100
+target-version = "py311"
+
+[tool.ruff.lint]
+select = ["E", "F", "I", "N", "W"]
+
+[tool.pytest.ini_options]
+testpaths = ["tests"]
+python_files = ["test_*.py"]
